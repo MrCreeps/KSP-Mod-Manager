@@ -6,6 +6,7 @@ from tkinter import ttk, filedialog, messagebox
 import subprocess
 
 DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/SpaceWarp"
+DEFAULT_FILE_PATH = "C:/Users/CadenAbdul/Downloads/KSP DIRECTORY/SpaceWarp"
 
 def add_mod(url, mod_dir, install_dir):
     # Download and extract mod
@@ -37,14 +38,14 @@ MOD_LIST = [
             "author": "Halban",
             "url": "https://spacedock.info/mod/3258/Lazy%20Orbit/download/v0.2.0",
             "license": "https://creativecommons.org/licenses/by-sa/4.0/",
-            "dir": "lazyOrbit"
+            "dir": "LazyOrbit"
         },
         {
             "name": "Custom Flags",
             "author": "adamsogm",
             "url": "https://spacedock.info/mod/3262/Custom%20Flags/download/1.0",
             "license": "https://mit-license.org/",
-            "dir": "customFlags"
+            "dir": "custom-flags"
         },
         {
             "name": "IVA",
@@ -58,7 +59,7 @@ MOD_LIST = [
             "author" : "ShadowDev",
             "url" : "https://spacedock.info/mod/3266/Cheats%20Menu/download/0.0.1",
             "license" : "https://creativecommons.org/licenses/by-nc-nd/4.0",
-            "dir": "cheatsMenu"
+            "dir": "cheats-menu"
         }
 ]
 
@@ -97,9 +98,14 @@ class ModInstallerGUI:
             self.mod_checkboxes.append(checkbox)
 
         # Button for installing mods
-        self.install_button = ttk.Button(master, text="Install", command=self.install_mods)
+        self.install_button = ttk.Button(master, text="Install Selected", command=self.install_mods)
         self.install_button.pack(pady=1)
 
+        # Button for uninstalling mods
+        self.remove_button = ttk.Button(master, text="Remove Selected", command=self.remove_mods)
+        self.remove_button.pack(pady=1)
+
+        # Button for Launching KSP
         self.run_ksp_button = ttk.Button(master, text="Launch KSP 2", command=self.run_ksp)
         self.run_ksp_button.pack(pady=10)
 
@@ -123,6 +129,30 @@ class ModInstallerGUI:
         path = tk.filedialog.askdirectory(initialdir="/", title="Select KSP2 directory")
         self.path_entry.delete(0, tk.END)
         self.path_entry.insert(0, path)
+
+    def remove_mods(self):
+        # Get file path from entry widget
+        file_path = self.path_entry.get()
+
+        mod_dir = f"{file_path}/mods/"
+        if not os.path.exists(mod_dir):
+            tk.messagebox.showerror("Nonexistant Mod Directory", "Try installing mods before removing them ;)")
+            return
+        
+        # Remove selected mods
+        for i, mod in enumerate(MOD_LIST):
+            if self.mod_vars[i].get():
+                confirm = tk.messagebox.askquestion(f"{mod['name']} Remove", f"Remove {mod['name']} by {mod['author']}?", icon="question")
+                if confirm == "yes":
+                    mod_path = f"{mod_dir}{mod['dir']}"
+                    if os.path.exists(mod_path):
+                        os.remove(mod_path)
+                        tk.messagebox.showinfo("Successful Removal", f"Successfully removed {mod_dir}.")
+                    else:
+                        tk.messagebox.showerror("Removal Failed", f"Removal of {mod_dir} failed because it does not exist.")
+
+                else:
+                    tk.messagebox.showerror(f"Not Removing {mod['name']}", f"Not Removing {mod['name']} by {mod['author']}.")
 
     def install_mods(self):
         # Get file path from entry widget
