@@ -4,9 +4,9 @@ import zipfile
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import subprocess
+import shutil
 
 DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/SpaceWarp"
-DEFAULT_FILE_PATH = "C:/Users/CadenAbdul/Downloads/KSP DIRECTORY/SpaceWarp"
 
 def add_mod(url, mod_dir, install_dir):
     # Download and extract mod
@@ -59,7 +59,7 @@ MOD_LIST = [
             "author" : "ShadowDev",
             "url" : "https://spacedock.info/mod/3266/Cheats%20Menu/download/0.0.1",
             "license" : "https://creativecommons.org/licenses/by-nc-nd/4.0",
-            "dir": "cheats-menu"
+            "dir": "cheats_menu"
         }
 ]
 
@@ -146,7 +146,7 @@ class ModInstallerGUI:
                 if confirm == "yes":
                     mod_path = f"{mod_dir}{mod['dir']}"
                     if os.path.exists(mod_path):
-                        os.remove(mod_path)
+                        shutil.rmtree(mod_path)
                         tk.messagebox.showinfo("Successful Removal", f"Successfully removed {mod_dir}.")
                     else:
                         tk.messagebox.showerror("Removal Failed", f"Removal of {mod_dir} failed because it does not exist.")
