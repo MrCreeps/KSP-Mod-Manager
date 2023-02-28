@@ -6,7 +6,7 @@ from tkinter import ttk, filedialog, messagebox
 import subprocess
 import shutil
 
-DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/SpaceWarp"
+DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/"
 
 def add_mod(url, mod_dir, install_dir):
     # Download and extract mod
@@ -83,6 +83,10 @@ class ModInstallerGUI:
         self.path_button = ttk.Button(self.path_frame, text="Browse", command=self.select_directory)
         self.path_button.grid(row=0, column=2, sticky="w", pady=10)
 
+        # Button for installing SpaceWarp
+        self.install_button = ttk.Button(master, text="Install SpaceWarp", command=self.install_sw)
+        self.install_button.pack(pady=1)
+
         # Create frame for mod list
         self.mod_frame = ttk.LabelFrame(master, text="Select mods to install")
         self.mod_frame.pack(fill="both", expand=True, padx=10, pady=10)
@@ -112,16 +116,27 @@ class ModInstallerGUI:
         # Set default file path in entry widget
         self.path_entry.insert(0, DEFAULT_FILE_PATH)
 
+    def install_sw(self):
+        shouldInstall = tk.messagebox.askquestion("Install SW", "Install SpaceWarp?")
+        if shouldInstall == "yes":
+            file_path = self.path_entry.get()
+            mod_zip = os.path.join(file_path, f"SPACEWARP.zip")
+            urllib.request.urlretrieve("https://spacedock.info/mod/3257/Space%20Warp/download/0.2.5", mod_zip)
+            with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
+                zip_ref.extractall(file_path)
+            # Delete mod zip file
+            os.remove(mod_zip)
+            tk.messagebox.showinfo("Successful Install", f"Successfully installed SpaceWarp.")
+
     def run_ksp(self):
         shouldRun = tk.messagebox.askquestion("Launch KSP2", "Launch Kerbal Space Program 2?")
         if shouldRun == "yes":
             file_path = self.path_entry.get()
             # Define the path to the executable
-            exe_path = file_path[:-9]
-            exe_path += "KSP2_x64.exe"
+            file_path += "KSP2_x64.exe"
 
             # Run the executable
-            subprocess.run(exe_path)
+            subprocess.run(file_path)
         else:
             tk.messagebox.showerror("Not Launching KSP2", "Kerbal Space Program 2 launch cancelled.")
 
@@ -132,7 +147,7 @@ class ModInstallerGUI:
 
     def remove_mods(self):
         # Get file path from entry widget
-        file_path = self.path_entry.get()
+        file_path = self.path_entry.get() + "/SpaceWarp/"
 
         mod_dir = f"{file_path}/mods/"
         if not os.path.exists(mod_dir):
@@ -156,7 +171,7 @@ class ModInstallerGUI:
 
     def install_mods(self):
         # Get file path from entry widget
-        file_path = self.path_entry.get()
+        file_path = self.path_entry.get() + "/SpaceWarp/"
 
         # Create Mods directory if it does not exist
         mod_dir = os.path.join(file_path, "Mods")
