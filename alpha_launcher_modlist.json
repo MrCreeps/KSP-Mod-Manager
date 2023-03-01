@@ -1,0 +1,58 @@
+[
+    {
+        "name": "Lazy Orbit",
+        "author": "Halban",
+        "url": "https://spacedock.info/mod/3258/Lazy%20Orbit/download/v0.2.0",
+        "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "dir": "LazyOrbit",
+        "fulldir": "False"
+    },
+    {
+        "name": "Custom Flags",
+        "author": "adamsogm",
+        "url": "https://spacedock.info/mod/3262/Custom%20Flags/download/1.0",
+        "license": "https://mit-license.org/",
+        "dir": "custom-flags",
+        "fulldir": "False"
+    },
+    {
+        "name": "IVA",
+        "author": "Mudkip909 & IsaQuest",
+        "url": "https://github.com/IsaQuest/KSP2-IVA/releases/download/v0.2.6.1/KSP2-IVA-SWv0.2.0.zip",
+        "license": "All Rights Reserved",
+        "dir": "IVA",
+        "fulldir": "True"
+    },
+    {
+        "name": "Cheats Menu",
+        "author" : "ShadowDev",
+        "url" : "https://spacedock.info/mod/3266/Cheats%20Menu/download/0.1.2",
+        "license" : "https://creativecommons.org/licenses/by-nc-nd/4.0",
+        "dir": "cheat_menu",
+        "fulldir": "False"
+    },
+    {
+        "name": "Unity Explorer for Space Warp",
+        "author" : "cheese3660",
+        "url" : "https://spacedock.info/mod/3268/Unity%20Explorer%20for%20Space%20Warp/download/1.0.0",
+        "license" : "https://mit-license.org/",
+        "dir": "unity_explorer",
+        "fulldir": "False"
+    },
+    {
+        "name": "Maneuver Node Controller",
+        "author" : "XYZ3211",
+        "url" : "https://spacedock.info/mod/3270/Maneuver%20Node%20Controller/download/0.02",
+        "license" : "https://creativecommons.org/licenses/by-nc-sa/3.0/",
+        "dir": "maneuver_node_controller",
+        "fulldir": "False"
+    },
+    {
+        "name": "Stage Info",
+        "author" : "natalia_simonova",
+        "url" : "https://spacedock.info/mod/3272/Stage%20Info/download/0.2",
+        "license" : "Other",
+        "dir": "StageInfo",
+        "fulldir": "True"
+    }
+]
