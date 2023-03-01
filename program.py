@@ -5,63 +5,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import subprocess
 import shutil
+import json
 
 DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/"
 
-def add_mod(url, mod_dir, install_dir):
-    # Download and extract mod
-    mod_zip = os.path.join(install_dir, f"{mod_dir}.zip")
-    urllib.request.urlretrieve(url, mod_zip)
-    with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
-        zip_ref.extractall(install_dir)
-
-    # Delete mod zip file
-    os.remove(mod_zip)
-
-    tk.messagebox.showinfo("Successful Install", f"Successfully installed {mod_dir}.")
-
-MOD_LIST = [
-    {
-            "name": "Lazy Orbit",
-            "author": "Halban",
-            "url": "https://spacedock.info/mod/3258/Lazy%20Orbit/download/v0.2.0",
-            "license": "https://creativecommons.org/licenses/by-sa/4.0/",
-            "dir": "LazyOrbit",
-            "fulldir": "False"
-        },
-        {
-            "name": "Custom Flags",
-            "author": "adamsogm",
-            "url": "https://spacedock.info/mod/3262/Custom%20Flags/download/1.0",
-            "license": "https://mit-license.org/",
-            "dir": "custom-flags",
-            "fulldir": "False"
-        },
-        {
-            "name": "### BROKEN DOWNLOAD LINK ### IVA (<0.2.0)",
-            "author": "Mudkip909",
-            "url": "https://spacedock.info/mod/3269/IVA%20Mod%20(SpaceWarp%200.1)/download/0.2.1",
-            "license": "https://mit-license.org/",
-            "dir": "IVA",
-            "fulldir": "True"
-        },
-        {
-            "name": "IVA (>0.2.0)",
-            "author": "Mudkip909 & IsaQuest",
-            "url": "https://github.com/IsaQuest/KSP2-IVA/releases/download/v0.2.6.1/KSP2-IVA-SWv0.2.0.zip",
-            "license": "All Rights Reserved",
-            "dir": "IVA",
-            "fulldir": "True"
-        },
-        {
-            "name": "Cheats Menu",
-            "author" : "ShadowDev",
-            "url" : "https://spacedock.info/mod/3266/Cheats%20Menu/download/0.0.1",
-            "license" : "https://creativecommons.org/licenses/by-nc-nd/4.0",
-            "dir": "cheats_menu",
-            "fulldir": "False"
-        },
-]
+with open("alpha_launcher_modlist.json", "r") as f:
+    MOD_LIST = json.load(f)
 
 class ModInstallerGUI:
     def __init__(self, master):
@@ -84,7 +33,7 @@ class ModInstallerGUI:
         self.path_button.grid(row=0, column=2, sticky="w", pady=10)
 
         # Button for installing SpaceWarp
-        self.install_button = ttk.Button(master, text="Install SpaceWarp 0.2.5", command=self.install_sw)
+        self.install_button = ttk.Button(master, text="Install SpaceWarp 0.3.0", command=self.install_sw)
         self.install_button.pack(pady=1)
 
         # Create frame for mod list
@@ -129,7 +78,7 @@ class ModInstallerGUI:
         if shouldInstall == "yes":
             file_path = self.path_entry.get()
             mod_zip = os.path.join(file_path, f"SPACEWARP.zip")
-            urllib.request.urlretrieve("https://spacedock.info/mod/3257/Space%20Warp/download/0.2.5", mod_zip)
+            urllib.request.urlretrieve("https://spacedock.info/mod/3257/Space%20Warp/download/0.3.0", mod_zip)
             with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
                 zip_ref.extractall(file_path)
             # Delete mod zip file
@@ -202,12 +151,27 @@ class ModInstallerGUI:
                 tk.messagebox.showinfo(f"{mod['name']} Info", f"{mod['name']} by {mod['author']} uses the {mod['license']} license.\nMod page at {mod['url']}")
                 confirm = tk.messagebox.askquestion(f"{mod['name']} Install", f"Install {mod['name']} by {mod['author']}?", icon="question")
                 if confirm == "yes":
+                    
                     if mod['name'] == "Custom Flags":
                         tk.messagebox.showerror("Make `flags/` Warning", "You will need to create a `flags/` folder in the KSP2 directory to add custom flags.")
-                    if mod['fulldir'] == "true":
-                        self.add_mod_full_dir(mod['url'], mod_dir, mod['dir'])
+
+                    if mod['fulldir'] == "True":
+                        ksp2_dir = self.path_entry.get()
+
+                        mod_zip = self.path_entry.get() + "/" + mod['dir'] + ".zip"
+                        print(mod_zip)
+                        urllib.request.urlretrieve(mod['url'], mod_zip)
+                        with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
+                            zip_ref.extractall(ksp2_dir)
                     else:
-                        add_mod(mod['url'], mod_dir, mod['dir'])
+                        mod_zip = mod_dir + "/" + mod['dir'] + ".zip"
+                        urllib.request.urlretrieve(mod['url'], mod_zip)
+                        with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
+                            zip_ref.extractall(mod_dir)
+
+                    # Delete mod zip file
+                    os.remove(mod_zip)
+                    tk.messagebox.showinfo("Successful Install", f"Successfully installed {mod['name']}.")
                 else:
                     tk.messagebox.showerror(f"Not Installing {mod['name']}", f"Not installing {mod['name']} by {mod['author']}.")
 
