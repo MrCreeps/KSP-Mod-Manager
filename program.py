@@ -6,16 +6,32 @@ from tkinter import ttk, filedialog, messagebox
 import subprocess
 import shutil
 import json
+import webbrowser
 
 DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/"
+vers = "0.3.0"
 
-with open("alpha_launcher_modlist.json", "r") as f:
-    MOD_LIST = json.load(f)
+try:
+    with open("alpha_launcher_modlist.json", "r") as f:
+        MOD_LIST = json.load(f)
+except:
+    webbrowser.open("https://github.com/MrCreeps/KSP-Mod-Manager/releases/tag/mod-list", new=2)
+    MOD_LIST = [
+        {
+            "name": "You need to download the mod list first or the mod list is in the wrong place. Make sure it is in the same directory as the .exe for this program.",
+            "author": "MrCreeps",
+            "url": "",
+            "lisence": "",
+            "fulldir": ","
+
+        }
+    ]
+
 
 class ModInstallerGUI:
     def __init__(self, master):
         self.master = master
-        master.title("αlpha Launcher :: MrCreeps")
+        master.title(f"αlpha Launcher {vers} :: MrCreeps")
 
         # Create frame for file path selection
         self.path_frame = ttk.LabelFrame(master, text="Select KSP2 directory")
@@ -35,6 +51,10 @@ class ModInstallerGUI:
         # Button for installing SpaceWarp
         self.install_button = ttk.Button(master, text="Install SpaceWarp 0.3.0", command=self.install_sw)
         self.install_button.pack(pady=1)
+
+        # Button for opening new mod list menu
+        self.modlist_button = ttk.Button(master, text="Download New Mod List", command= webbrowser.open("https://github.com/MrCreeps/KSP-Mod-Manager/releases/tag/mod-list", new=2))
+        self.modlist_button.pack(pady=1)
 
         # Create frame for mod list
         self.mod_frame = ttk.LabelFrame(master, text="Select mods to install")
@@ -159,7 +179,6 @@ class ModInstallerGUI:
                         ksp2_dir = self.path_entry.get()
 
                         mod_zip = self.path_entry.get() + "/" + mod['dir'] + ".zip"
-                        print(mod_zip)
                         urllib.request.urlretrieve(mod['url'], mod_zip)
                         with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
                             zip_ref.extractall(ksp2_dir)
