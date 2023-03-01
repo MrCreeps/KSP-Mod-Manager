@@ -117,16 +117,6 @@ class ModInstallerGUI:
         else:
             tk.messagebox.showerror("Not Launching KSP2", "Kerbal Space Program 2 launch cancelled.")
 
-    def add_mod_full_dir(self, url, mod_dir, install_dir):
-        # Download and extract mod
-        mod_zip = os.path.join(install_dir, f"{mod_dir}.zip")
-        urllib.request.urlretrieve(url, mod_zip)
-        with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
-            zip_ref.extractall(self.path_entry.get())
-
-        # Delete mod zip file
-        os.remove(mod_zip)
-
     def select_directory(self):
         path = tk.filedialog.askdirectory(initialdir="/", title="Select KSP2 directory")
         self.path_entry.delete(0, tk.END)
