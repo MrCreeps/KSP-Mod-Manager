@@ -163,7 +163,7 @@ class ModInstallerGUI:
             if self.mod_vars[i].get():
                 confirm = tk.messagebox.askquestion(f"{mod['name']} Remove", f"Remove {mod['name']} by {mod['author']}?", icon="question")
                 if confirm == "yes":
-                    mod_path = f"{mod_dir}{mod['dir']}"
+                    mod_path = f"{mod_dir}{mod['name']}" ########################## CHANGED FROM DIR TO NAME #############################
                     if os.path.exists(mod_path):
                         shutil.rmtree(mod_path)
                         tk.messagebox.showinfo("Successful Removal", f"Successfully removed {mod_dir}.")
@@ -188,19 +188,24 @@ class ModInstallerGUI:
                 tk.messagebox.showinfo(f"{mod['name']} Info", f"{mod['name']} by {mod['author']} uses the {mod['license']} license.\nMod page at {mod['url']}")
                 confirm = tk.messagebox.askquestion(f"{mod['name']} Install", f"Install {mod['name']} by {mod['author']}?", icon="question")
                 if confirm == "yes":
+                    
+                    mod_zip = mod_dir + "/" + mod['dir'] + ".zip"
+                    urllib.request.urlretrieve(mod['url'], mod_zip)
+                    
+                    # Get the contents of the zip
+                    # If the folder is 'SpaceWarp', set extract_dir to self.path_entry.get()
+                    # Else, set extract_dir to mod_dir
+                    
+                    extract_dir = ""
+                    
+                    with zipfile.ZipFile(extract_dir, 'r') as zip_ref:
+                        zip_ref.extractall(extract_dir)
+                        
+                     
+                    # Rename the newly extracted folder to mod['name']
+                    
+                    
 
-                    if mod['fulldir'] == "True":
-                        ksp2_dir = self.path_entry.get()
-
-                        mod_zip = self.path_entry.get() + "/" + mod['dir'] + ".zip"
-                        urllib.request.urlretrieve(mod['url'], mod_zip)
-                        with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
-                            zip_ref.extractall(ksp2_dir)
-                    else:
-                        mod_zip = mod_dir + "/" + mod['dir'] + ".zip"
-                        urllib.request.urlretrieve(mod['url'], mod_zip)
-                        with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
-                            zip_ref.extractall(mod_dir)
 
 
                     # Delete mod zip file
