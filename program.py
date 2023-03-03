@@ -5,28 +5,58 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import subprocess
 import shutil
-import json
-import webbrowser
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+from tqdm import tqdm
+
+def dynamic_getter():
+    MOD_LIST = []
+    url = "https://spacedock.info/kerbal-space-program-2/browse/new"
+    search_term = "mod"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    for link in tqdm(soup.find_all("a")):
+        href = link.get("href")
+        if href and search_term in href and href.endswith("/download"):
+            download_link = urljoin(url, href).replace("%20", "")
+            last_slash_index = download_link.rfind('/')
+            mod_page_link = download_link[:last_slash_index]
+            mod_response = requests.get(mod_page_link)
+            mod_text = mod_response.text
+            mod_soup = BeautifulSoup(mod_text, 'html.parser')
+            mod_text = mod_soup.get_text()
+            lines = mod_text.split("\n")
+            mod_name = mod_page_link[32:]
+            supportsSpaceWarp = False
+            for i in range(len(lines)):
+                if "spacewarp" in lines[i].lower():
+                    supportsSpaceWarp = True
+            if supportsSpaceWarp:
+                for i in range(len(lines)):
+                    if "Author:" in lines[i]:
+                        author = lines[i+3].strip()
+                        break
+                for i in range(len(lines)):
+                    if "License:" in lines[i]:
+                        license = lines[i+2].strip()
+                        break
+                MOD_LIST.append({
+                    "name" : f"{mod_name}",
+                    "author" : f"{author}",
+                    "url" : f"{download_link}",
+                    "license" : f"{license}",
+                    "dir" : f"{mod_name}",
+                    "fulldir" : "False"
+                })
+    return MOD_LIST
+
 
 DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/"
 vers = "0.3.0"
 
-try:
-    with open("alpha_launcher_modlist.json", "r") as f:
-        MOD_LIST = json.load(f)
-except:
-    webbrowser.open("https://github.com/MrCreeps/KSP-Mod-Manager/releases/tag/mod-list", new=2)
-    MOD_LIST = [
-        {
-            "name": "You need to download the mod list first or the mod list is in the wrong place. Make sure it is in the same directory as the .exe for this program.",
-            "author": "MrCreeps",
-            "url": "",
-            "lisence": "",
-            "fulldir": ","
-
-        }
-    ]
-
+MOD_LIST = dynamic_getter()
+print(MOD_LIST)
 
 class ModInstallerGUI:
     def __init__(self, master):
@@ -52,10 +82,6 @@ class ModInstallerGUI:
         self.install_button = ttk.Button(master, text="Install SpaceWarp 0.3.0", command=self.install_sw)
         self.install_button.pack(pady=1)
 
-        # Button for opening new mod list menu
-        self.modlist_button = ttk.Button(master, text="Download New Mod List", command= webbrowser.open("https://github.com/MrCreeps/KSP-Mod-Manager/releases/tag/mod-list", new=2))
-        self.modlist_button.pack(pady=1)
-
         # Create frame for mod list
         self.mod_frame = ttk.LabelFrame(master, text="Select mods to install")
         self.mod_frame.pack(fill="both", expand=True, padx=10, pady=10)
@@ -64,11 +90,12 @@ class ModInstallerGUI:
         self.mod_vars = []
         self.mod_checkboxes = []
         for i, mod in enumerate(MOD_LIST):
-            var = tk.BooleanVar(value=False)
-            checkbox = ttk.Checkbutton(self.mod_frame, text=f"{mod['name']} by {mod['author']}", variable=var)
-            checkbox.grid(row=i, column=0, sticky="w", padx=(0, 10), pady=5)
-            self.mod_vars.append(var)
-            self.mod_checkboxes.append(checkbox)
+            if mod['name'] != "SpaceWarp":
+                var = tk.BooleanVar(value=False)
+                checkbox = ttk.Checkbutton(self.mod_frame, text=f"{mod['name']} by {mod['author']}", variable=var)
+                checkbox.grid(row=i, column=0, sticky="w", padx=(0, 10), pady=5)
+                self.mod_vars.append(var)
+                self.mod_checkboxes.append(checkbox)
 
         # Frame for utility buttons
         self.buttons_frame = ttk.LabelFrame(master, text="Utility buttons")
@@ -98,7 +125,7 @@ class ModInstallerGUI:
         if shouldInstall == "yes":
             file_path = self.path_entry.get()
             mod_zip = os.path.join(file_path, f"SPACEWARP.zip")
-            urllib.request.urlretrieve("https://spacedock.info/mod/3257/Space%20Warp/download/0.3.0", mod_zip)
+            urllib.request.urlretrieve("https://spacedock.info/mod/3257/SpaceWarp/download", mod_zip)
             with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
                 zip_ref.extractall(file_path)
             # Delete mod zip file
@@ -161,9 +188,6 @@ class ModInstallerGUI:
                 tk.messagebox.showinfo(f"{mod['name']} Info", f"{mod['name']} by {mod['author']} uses the {mod['license']} license.\nMod page at {mod['url']}")
                 confirm = tk.messagebox.askquestion(f"{mod['name']} Install", f"Install {mod['name']} by {mod['author']}?", icon="question")
                 if confirm == "yes":
-                    
-                    if mod['name'] == "Custom Flags":
-                        tk.messagebox.showerror("Make `flags/` Warning", "You will need to create a `flags/` folder in the KSP2 directory to add custom flags.")
 
                     if mod['fulldir'] == "True":
                         ksp2_dir = self.path_entry.get()
@@ -177,6 +201,7 @@ class ModInstallerGUI:
                         urllib.request.urlretrieve(mod['url'], mod_zip)
                         with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
                             zip_ref.extractall(mod_dir)
+
 
                     # Delete mod zip file
                     os.remove(mod_zip)
