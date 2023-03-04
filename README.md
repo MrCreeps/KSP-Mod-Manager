@@ -5,4 +5,4 @@ All of the code is available in the code tab on the GitHub.\
 αlpha Launcher is licensed under the CC BY-NC 4.0 license meaning you can distribute and modify any part of the code, but cannot profit off of it and must give credit and state what was modified.
 The full license is available in the `license` file.\n\n
 # Videos
-https://youtu.be/Q9u9qpXLR_I
+Quickest Way to Install KSP2 Mods! - alpha Launcher (https://youtu.be/Q9u9qpXLR_I)
