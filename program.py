@@ -8,15 +8,18 @@ import shutil
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from tqdm import tqdm
 
 def dynamic_getter():
     MOD_LIST = []
+
+    # Gets the content from the mods page
     url = "https://spacedock.info/kerbal-space-program-2/browse/new"
     search_term = "mod"
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
-    for link in tqdm(soup.find_all("a")):
+
+    # Gets the links and formats them into separate variables for later use
+    for link in (soup.find_all("a")):
         href = link.get("href")
         if href and search_term in href and href.endswith("/download"):
             download_link = urljoin(url, href).replace("%20", "")
@@ -28,6 +31,8 @@ def dynamic_getter():
             mod_text = mod_soup.get_text()
             lines = mod_text.split("\n")
             mod_name = mod_page_link[32:]
+
+            # Checks if it supports SpaceWarp and gets the Author and License
             supportsSpaceWarp = False
             for i in range(len(lines)):
                 if "spacewarp" in lines[i].lower():
@@ -41,6 +46,7 @@ def dynamic_getter():
                     if "License:" in lines[i]:
                         license = lines[i+2].strip()
                         break
+                # Adds the mod to MOD_LIST
                 MOD_LIST.append({
                     "name" : f"{mod_name}",
                     "author" : f"{author}",
@@ -51,15 +57,17 @@ def dynamic_getter():
                 })
     return MOD_LIST
 
-
-DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/"
-vers = "0.3.0"
-
+# Sets constants
 MOD_LIST = dynamic_getter()
 print(MOD_LIST)
 
+DEFAULT_FILE_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2/"
+vers = "0.4.1"
+
+# Initializes ModInstallerGUI
 class ModInstallerGUI:
     def __init__(self, master):
+        
         self.master = master
         master.title(f"αlpha Launcher {vers} :: MrCreeps")
 
@@ -89,13 +97,20 @@ class ModInstallerGUI:
         # Checkboxes for mod selection
         self.mod_vars = []
         self.mod_checkboxes = []
+        row = 0
+        column = 0
         for i, mod in enumerate(MOD_LIST):
             if mod['name'] != "SpaceWarp":
                 var = tk.BooleanVar(value=False)
                 checkbox = ttk.Checkbutton(self.mod_frame, text=f"{mod['name']} by {mod['author']}", variable=var)
-                checkbox.grid(row=i, column=0, sticky="w", padx=(0, 10), pady=5)
+                checkbox.grid(row=row, column=column, sticky="w", padx=(0, 10), pady=5)
                 self.mod_vars.append(var)
                 self.mod_checkboxes.append(checkbox)
+                # Extend columns
+                row += 1
+                if row == 8:
+                    row = 0
+                    column += 1
 
         # Frame for utility buttons
         self.buttons_frame = ttk.LabelFrame(master, text="Utility buttons")
@@ -121,6 +136,7 @@ class ModInstallerGUI:
         self.path_entry.insert(0, DEFAULT_FILE_PATH)
 
     def install_sw(self):
+        # Intalls SpaceWarp
         shouldInstall = tk.messagebox.askquestion("Install SW", "Install SpaceWarp?")
         if shouldInstall == "yes":
             file_path = self.path_entry.get()
@@ -153,6 +169,7 @@ class ModInstallerGUI:
         # Get file path from entry widget
         file_path = self.path_entry.get() + "/SpaceWarp/"
 
+        # Checks if the mod directory has mods in it
         mod_dir = f"{file_path}/mods/"
         if not os.path.exists(mod_dir):
             tk.messagebox.showerror("Nonexistant Mod Directory", "Try installing mods before removing them ;)")
@@ -189,27 +206,38 @@ class ModInstallerGUI:
                 confirm = tk.messagebox.askquestion(f"{mod['name']} Install", f"Install {mod['name']} by {mod['author']}?", icon="question")
                 if confirm == "yes":
                     
+                    # Downloads the mod zip
                     mod_zip = mod_dir + "/" + mod['dir'] + ".zip"
                     urllib.request.urlretrieve(mod['url'], mod_zip)
                     
-                    # Get the contents of the zip
-                    # If the folder is 'SpaceWarp', set extract_dir to self.path_entry.get()
-                    # Else, set extract_dir to mod_dir
+                    # Checks what's in the folder
+                    with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
+                        folder_name = None
+                        for file_name in zip_ref.namelist():
+                            if '/' in file_name:
+                                current_folder = file_name.split('/')[0]
+                                if folder_name is None or current_folder != folder_name:
+                                    folder_name = current_folder
+                                    break
                     
-                    extract_dir = ""
-                    
-                    with zipfile.ZipFile(extract_dir, 'r') as zip_ref:
+                    # Checks where to unzip
+                    if folder_name == "SpaceWarp":
+                        extract_dir = self.path_entry.get()
+                    else:
+                        extract_dir = mod_dir
+
+                    # Unzips
+                    with zipfile.ZipFile(mod_zip, 'r') as zip_ref:
                         zip_ref.extractall(extract_dir)
                         
                      
                     # Rename the newly extracted folder to mod['name']
-                    
-                    
 
 
 
                     # Delete mod zip file
                     os.remove(mod_zip)
+                    
                     tk.messagebox.showinfo("Successful Install", f"Successfully installed {mod['name']}.")
                 else:
                     tk.messagebox.showerror(f"Not Installing {mod['name']}", f"Not installing {mod['name']} by {mod['author']}.")
@@ -222,4 +250,6 @@ class ModInstallerGUI:
 
 root = tk.Tk()  # Create main window
 gui = ModInstallerGUI(root)  # Pass main window as argument to create instance of ModInstallerGUI
+icon = tk.PhotoImage(file = "alphaLauncherlogo.png")
+root.iconphoto(False, icon)  
 root.mainloop()  # Start event loop for main window
