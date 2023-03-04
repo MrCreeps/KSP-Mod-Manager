@@ -1,3 +1,4 @@
+![alphaLauncherlogo](https://user-images.githubusercontent.com/75145015/222870410-6399ebe6-6eea-4267-bb64-3ea653d9d9cc.png)
 # αlpha Launcher
 
 is a tool for KSP2 that automatically gets mods from SpaceDock and allows the user to download them without ever having to go anywhere but αlpha (alpha) Launcher.\
